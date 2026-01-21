@@ -8,8 +8,6 @@ public class Sound {
     private String fileName;
     private ArrayList<Runnable> transformationHistory;
     private boolean isReplaying = false;
-
-
     /*
      * Constructor: loads hello.wav by default.
      */
@@ -20,8 +18,6 @@ public class Sound {
         originalData = new ArrayList<Integer>(myData);
         transformationHistory = new ArrayList<Runnable>();
     }
-
-
     /*
      * Constructor: creates an empty sound with the specific length of samples, all set 
      * to 0.  Remember, the default sample rate is 22050 samples per second.
@@ -33,7 +29,6 @@ public class Sound {
         originalData = new ArrayList<Integer>(myData);
         transformationHistory = new ArrayList<Runnable>();
     }
-
     /*
      * Constructor: create a new sound from a given filename
      */
@@ -43,30 +38,25 @@ public class Sound {
         myData = myViewer.load(fileName);
         originalData = new ArrayList<Integer>(myData);
         transformationHistory = new ArrayList<Runnable>();
-    }
-
-    
+    }  
     /*
      * Call this method to listen to the sound
      */
     public void play() {
         myViewer.play();
     }
-
     /*
      * Zoom the viewer to a part of the sound
      */
     public void zoomTo(int begin, int end) {
         myViewer.zoomTo(begin, end);
     }
-
     /*
      * Save the sound back to its file
      */
     public void save() {
         myViewer.writeToFile(fileName);
     }
-
     /*
      * Save the sound to a new file
      */
@@ -74,14 +64,12 @@ public class Sound {
         myViewer.writeToFile(anotherfile);
         fileName = anotherfile;
     }
-
     /*
      * Load in sound from a new file, overwriting the old
      */
     public void load(String filename) {
         myData = myViewer.load(filename);
     }
-
     /*
      * Call this method to refresh the viewer after you've made changes to the sound data
      */
@@ -97,14 +85,12 @@ public class Sound {
         }
         myViewer.refresh(true);
     }
-
     /*
      * Returns the viewer associated with this sound
      */
     public Viewer getViewer() {
         return myViewer;
     }
-
     /*
      * Open a new viewer window with a cloned copy of the current sound.
      * Useful for side-by-side comparison without sharing the same data.
@@ -115,7 +101,6 @@ public class Sound {
         v.openWithHelper(helperCopy);
         return v;
     }
-
     /*
      * Returns the sample rate of the sound.  Note, this should generally be 22050
      * for all your sounds, unless you have had problems with slow computers. 
@@ -226,20 +211,28 @@ public class Sound {
      * reverse the sound
      */
     public void reverse() {
-
-
+        for(int i = 0; i <= myData.size() / 2; i++){
+            swap(i, myData.size() - i - 1);
+        }
     }
 
+    public void swap(int i1, int i2){
+        int temp = myData.get(i1);
+        myData.set(i1, myData.get(i2));
+        myData.set(i2, temp);
+    }
     // this throws out half the data
     public void doublePitch() {
-
+        for(Integer i: myData){
+            i *= 2;
+        }
     }
-
-
   
     //complete this method
     public void amplify (double amt) {
-
+        for(Integer i: myData){
+            i = (int) (i * amt);
+        }
     }
 
     /*
@@ -247,7 +240,12 @@ public class Sound {
      * Used by normalize() to determine the scaling factor.
      */
     private int findAbsoluteMax() {
-  
+        int highest = 0;
+        for(Integer i: myData){
+            if(Math.abs(i) > highest)
+                highest = Math.abs(i);
+        }
+        return highest;
     }
 
     /*
@@ -256,7 +254,7 @@ public class Sound {
      * This makes quiet sounds louder while preventing distortion.
      */
     public void normalize() {
-
+        amplify(32000 * 1.0 / (findAbsoluteMax() * 1.0));
 
     }
 
@@ -268,8 +266,13 @@ public class Sound {
     // - replace the current value with the new value
     // - refresh!
     public void fadeIn(double seconds) {
-
-   
+        int samples = (int)(seconds * getSamplingRate());
+        int a = 0;
+        for(double i = 0; a < samples; i += 1.0 / samples){
+            myData.set(a, (int)(myData.get(a) * i));
+            a++;
+        }
+        refresh();
     }
 
 
